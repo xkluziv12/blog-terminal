@@ -21,6 +21,15 @@
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Inter',sans-serif; background:var(--cream); color:var(--text-primary); line-height:1.6; padding-bottom:80px; }
 
+        /* BOOT */
+        .boot-overlay { position:fixed; inset:0; background:linear-gradient(135deg,var(--navy-dark),var(--navy)); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:80px; transition:opacity .6s,visibility .6s; }
+        .boot-overlay.hidden { opacity:0; visibility:hidden; }
+        .boot-logo { font-size:64px; font-weight:200; letter-spacing:8px; color:var(--white); margin-bottom:40px; animation:bootPulse 2s ease-in-out infinite; }
+        .boot-logo span { color:var(--gold); font-weight:300; }
+        .boot-text div { opacity:0; animation:bootFadeIn .4s forwards; font-size:12px; letter-spacing:1px; color:var(--gold-light); text-transform:uppercase; line-height:2; text-align:center; }
+        @keyframes bootPulse { 0%,100%{opacity:1}50%{opacity:.8} }
+        @keyframes bootFadeIn { to{opacity:1} }
+
         /* HEADER */
         .ai-header { background:linear-gradient(135deg,var(--white),var(--cream)); padding:60px 30px 70px; position:relative; overflow:hidden; border-bottom:2px solid var(--gold); }
         .ai-header::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(90deg,transparent 0,transparent 100px,rgba(201,169,98,.03) 100px,rgba(201,169,98,.03) 101px); animation:dataStream 30s linear infinite; }
@@ -109,7 +118,7 @@
         .select-badge { position:absolute; top:14px; right:14px; background:var(--gold); color:var(--white); font-size:11px; font-weight:700; padding:3px 10px; border-radius:10px; display:none; }
         .topic-card.selected .select-badge { display:block; }
 
-        /* META PANEL */
+        /* META PANEL — shown immediately after topic select */
         .meta-panel { display:none; background:var(--white); border:2px solid var(--gold); border-radius:14px; padding:32px; margin-top:20px; }
         .meta-panel.visible { display:block; }
         .meta-panel.dcd { border-color:var(--dcd-teal); }
@@ -130,7 +139,7 @@
         .phase.phase-complete { border-color:var(--gold); box-shadow:0 2px 12px rgba(201,169,98,.15); }
         .phase.phase-complete .phase-header { background:linear-gradient(135deg,#fdfbf7,#f9f6f0); border-left:3px solid var(--gold); }
         .phase.phase-complete .phase-num { background:var(--gold); color:var(--white); }
-        .phase.phase-complete::after { content:'\2713'; position:absolute; top:18px; right:20px; background:var(--gold); color:var(--white); width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
+        .phase.phase-complete::after { content:'✓'; position:absolute; top:18px; right:20px; background:var(--gold); color:var(--white); width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
         .phase.active { border-color:var(--navy); box-shadow:0 2px 16px var(--shadow-medium); }
         .phase.active .phase-num { background:var(--navy); }
         .phase.active .phase-header { background:var(--cream); border-left:3px solid var(--gold); }
@@ -220,6 +229,7 @@
         .open-btn.teal { background:var(--dcd-teal); }
         .open-btn.teal:hover { background:#0f766e; }
 
+        /* TOAST */
         /* FLOATING CHAT WIDGET */
         .chat-fab { position:fixed; bottom:30px; right:30px; width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--navy),var(--navy-dark)); color:var(--white); border:none; cursor:pointer; box-shadow:0 6px 24px rgba(30,58,95,.35); z-index:3000; display:flex; align-items:center; justify-content:center; font-size:24px; transition:all .3s; }
         .chat-fab:hover { transform:scale(1.08); box-shadow:0 8px 32px rgba(30,58,95,.45); }
@@ -286,18 +296,24 @@
 </head>
 <body>
 
+<!-- Hidden badge for JS references -->
 <div id="headerCompanyBadge" class="company-badge sts" style="display:none;">STS</div>
 
-
+<!-- Progress elements hidden for JS refs -->
+<div id="timerDisplay" style="display:none;">00:00</div>
+<div id="progressBar" style="display:none;"></div>
+<div id="percentDisplay" style="display:none;">0%</div>
 
 <div class="container">
 
+    <!-- ===== MISSION CONTROL ===== -->
     <div class="card setup-section">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <h2 style="color:var(--navy);font-size:20px;">&#9881;&#65039; Mission Control (Blog Terminal)</h2>
-            <button class="btn btn-ghost" onclick="resetAll()" style="border-color:#ef4444;"><span style="color:#ef4444;">&#9888;&#65039;</span> Reset</button>
+            <h2 style="color:var(--navy);font-size:20px;">⚙️ Mission Control (Blog Terminal)</h2>
+            <button class="btn btn-ghost" onclick="resetAll()" style="border-color:#ef4444;"><span style="color:#ef4444;">⚠️</span> Reset</button>
         </div>
 
+        <!-- COMPANY TOGGLE -->
         <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);display:block;margin-bottom:8px;">Select Company</label>
         <div class="company-toggle-wrap">
             <button id="stsBtn" class="company-toggle-btn active-sts" onclick="setCompany('STS')"><i class="fas fa-recycle"></i> STS Blog</button>
@@ -321,6 +337,7 @@
             <textarea id="mgmtIdea" class="paste-area" style="height:55px;" placeholder="e.g. 'Write a blog about Chromebook recycling for K-12 districts in 2026'"></textarea>
         </div>
 
+        <!-- RESEARCH PANEL -->
         <div class="research-panel" id="researchPanel">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
                 <div style="color:var(--white);font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;">
@@ -334,6 +351,7 @@
                 <i class="fas fa-rocket"></i> Run Research &amp; Generate Topics
             </button>
 
+            <!-- THINKING STATE -->
             <div class="thinking-indicator" id="thinkingIndicator">
                 <div class="thinking-dots">
                     <div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div>
@@ -342,14 +360,17 @@
                 <div class="thinking-status" id="thinkingStatus">Searching live web · Analyzing competitors · Building topic brief</div>
             </div>
 
+            <!-- ERROR -->
             <div class="error-box" id="researchError"></div>
 
+            <!-- TOPIC CARDS -->
             <div class="topics-wrapper" id="topicsWrapper">
                 <div class="topics-header"><i class="fas fa-list-ul" style="color:var(--gold);"></i> Select a Topic — Meta fields generate instantly</div>
                 <div id="topicCardsList"></div>
             </div>
         </div>
 
+        <!-- META PANEL — visible after topic selection -->
         <div class="meta-panel" id="metaPanel">
             <div class="meta-panel-header">
                 <i class="fas fa-tags" style="color:var(--gold);font-size:18px;"></i>
@@ -358,6 +379,7 @@
                 <button class="btn btn-ghost sm" onclick="copyAllMeta()" style="margin-left:auto;"><i class="fas fa-copy"></i> Copy All</button>
             </div>
 
+            <!-- Chat Name Banner -->
             <div class="chat-name-banner" id="chatNameBanner">
                 <div>
                     <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold-dark);margin-bottom:3px;">Claude Chat Name</div>
@@ -407,10 +429,11 @@
             </div>
         </div>
     </div>
-    </div>
+    </div><!-- end #blogInputsSection -->
 
-    <div id="sheetReminderBanner" style="display:none;background:linear-gradient(135deg,#1e3a5f,#2d4a6f);border:1px solid var(--gold);border-radius:10px;padding:14px 20px;align-items:center;gap:14px;">
-        <span style="font-size:20px;">&#128203;</span>
+    <!-- SHEET REMINDER BANNER -->
+    <div id="sheetReminderBanner" style="display:none;background:linear-gradient(135deg,#1e3a5f,#2d4a6f);border:1px solid var(--gold);border-radius:10px;padding:14px 20px;margin-bottom:20px;align-items:center;gap:14px;">
+        <span style="font-size:20px;">📋</span>
         <div style="flex:1;">
             <div id="bannerTitle" style="color:var(--gold);font-weight:700;font-size:13px;margin-bottom:2px;">Log this blog after publishing</div>
             <div id="bannerSub" style="color:rgba(255,255,255,.55);font-size:11px;">Title · Slug · Live URL · VA name · Date</div>
@@ -421,10 +444,13 @@
         </div>
     </div>
 
+    <!-- ===== BLOG CONTENT (hidden when CHAT mode) ===== -->
     <div id="blogContent">
+
+    <!-- ===== PHASES ===== -->
     <div id="phases">
 
-        <!-- PHASE 1 -->
+        <!-- ═══════ PHASE 1: BUILD + CMS SETUP (PARALLEL) ═══════ -->
         <div class="card phase" id="phase1">
             <div class="phase-header" onclick="togglePhase('phase1')">
                 <div class="phase-title"><span class="phase-num">1</span> Build Blog + CMS Setup</div>
@@ -434,14 +460,15 @@
 
                 <div class="info-box" style="margin-bottom:15px;"><i class="fas fa-columns" style="color:var(--gold);"></i> <strong>Split View recommended</strong> — open Claude + Joomla/Shogun side by side in Chrome (or two browser windows)</div>
 
+                <!-- Claude launcher -->
                 <div class="launcher-box" id="launcherBox">
                     <div style="font-size:18px;font-weight:600;color:white;display:flex;align-items:center;justify-content:center;gap:12px;"><i class="fas fa-brain"></i> Open Claude Project</div>
                     <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;" id="projectSubLabel">STS Blog Project</div>
-                    <div class="model-warning"><i class="fas fa-exclamation-triangle"></i> &#9888;&#65039; MUST USE CLAUDE SONNET 4.6 — NOT OPUS &#9888;&#65039;</div>
+                    <div class="model-warning"><i class="fas fa-exclamation-triangle"></i> ⚠️ MUST USE CLAUDE SONNET 4.6 — NOT OPUS ⚠️</div>
                     <div style="color:#fca5a5;font-size:11px;margin-bottom:8px;">Check model selector bottom-left of Claude chat</div>
                     <a id="projectOpenBtn" href="https://claude.ai/project/019aef3e-df18-7142-a666-8397254c5fe8" target="_blank" class="open-btn" style="flex-direction:column;gap:4px;">
                         <span style="display:flex;align-items:center;gap:8px;"><i class="fas fa-external-link-alt"></i> Open Claude Project</span>
-                        <span style="font-size:11px;opacity:.8;">&#9889; SELECT SONNET 4.6 &#9889;</span>
+                        <span style="font-size:11px;opacity:.8;">⚡ SELECT SONNET 4.6 ⚡</span>
                     </a>
                 </div>
 
@@ -449,6 +476,7 @@
                     <div class="info-box teal"><strong>DCD:</strong> Upload the DCD Design Bible to Claude before pasting the build prompt.</div>
                 </div>
 
+                <!-- Build prompt buttons -->
                 <div id="buildInstructSTS" class="data-box" style="border-color:var(--navy);">
                     <div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;"><i class="fas fa-info-circle" style="color:var(--gold);"></i> These are loaded in the Claude Project — links for reference/re-upload if needed</div>
                     <div class="quick-links" style="margin-bottom:12px;">
@@ -473,13 +501,14 @@
 
                 <div class="divider"></div>
 
-                <!-- STS JOOMLA -->
+                <!-- STS: JOOMLA SETUP (while Claude builds) -->
                 <div id="joomlaSetupSTS" data-company="STS">
                     <div class="part-header"><i class="fas fa-globe"></i> SET UP JOOMLA — while Claude builds</div>
                     <div class="quick-links" style="margin-bottom:12px;">
                         <a href="https://www.stselectronicrecyclinginc.com/administrator/index.php?option=com_menus&view=items&menutype=blog" target="_blank" class="quick-link"><i class="fas fa-bars"></i> Open Blog Menu</a>
                     </div>
 
+                    <!-- Copy boxes: Page Title + Slug -->
                     <div class="copy-strip">
                         <div class="copy-strip-row">
                             <div><div class="copy-strip-label">Page Title</div><div class="copy-strip-value" id="cs-menu-title">—</div></div>
@@ -538,7 +567,7 @@
                     <div class="step"><input type="checkbox" id="p1-12" onchange="updateProgress()"><div class="step-label"><strong>Save</strong> menu item</div></div>
                 </div>
 
-                <!-- DCD SHOGUN -->
+                <!-- DCD: SHOGUN SETUP (while Claude builds) -->
                 <div id="shogunSetupDCD" data-company="DCD" style="display:none;">
                     <div class="part-header teal"><i class="fas fa-store"></i> SET UP SHOGUN — while Claude builds</div>
                     <div class="quick-links" style="margin-bottom:12px;">
@@ -574,7 +603,7 @@
             </div>
         </div>
 
-        <!-- PHASE 2 -->
+        <!-- ═══════ PHASE 2: SEO AUDIT ═══════ -->
         <div class="card phase" id="phase2">
             <div class="phase-header" onclick="togglePhase('phase2')">
                 <div class="phase-title"><span class="phase-num">2</span> SEO Audit</div>
@@ -591,11 +620,11 @@
                 <button class="btn btn-accent btn-compile" style="width:100%;margin-bottom:15px;" onclick="copyPrompt('seo'); animateButton(this,'Generating...','Ready')"><i class="fas fa-search"></i> Copy SEO Audit Prompt</button>
                 <div class="step"><input type="checkbox" id="p2-1" onchange="updateProgress()"><div class="step-label">SEO audit prompt pasted — Claude auditing</div></div>
                 <div class="step"><input type="checkbox" id="p2-2" onchange="updateProgress()"><div class="step-label">Review changes — design &amp; UX preserved</div></div>
-                <div class="step"><input type="checkbox" id="p2-3" onchange="updateProgress()"><div class="step-label">&#9989; SEO-optimized HTML ready</div></div>
+                <div class="step"><input type="checkbox" id="p2-3" onchange="updateProgress()"><div class="step-label">✅ SEO-optimized HTML ready</div></div>
             </div>
         </div>
 
-        <!-- PHASE 3 -->
+        <!-- ═══════ PHASE 3: LINK AUDIT ═══════ -->
         <div class="card phase" id="phase3">
             <div class="phase-header" onclick="togglePhase('phase3')">
                 <div class="phase-title"><span class="phase-num">3</span> Link Audit</div>
@@ -605,11 +634,11 @@
                 <div class="warning-box" style="margin-bottom:15px;"><i class="fas fa-exclamation-triangle"></i> <strong>Last check before publishing — no exceptions.</strong></div>
                 <button class="btn btn-compile" style="width:100%;margin-bottom:15px;background:linear-gradient(135deg,#f97316,#ea580c);color:white;" onclick="copyPrompt('links'); animateButton(this,'Scanning...','Ready')"><i class="fas fa-link"></i> Copy Link Audit Prompt</button>
                 <div class="step"><input type="checkbox" id="p3-1" onchange="updateProgress()"><div class="step-label">Link audit prompt pasted — Claude scanning</div></div>
-                <div class="step"><input type="checkbox" id="p3-2" onchange="updateProgress()"><div class="step-label">&#9989; All links verified — final HTML ready</div></div>
+                <div class="step"><input type="checkbox" id="p3-2" onchange="updateProgress()"><div class="step-label">✅ All links verified — final HTML ready</div></div>
             </div>
         </div>
 
-        <!-- PHASE 4 STS -->
+        <!-- ═══════ PHASE 4 STS: PUBLISH TO JOOMLA ═══════ -->
         <div class="card phase" id="phase4-sts" data-company="STS">
             <div class="phase-header" onclick="togglePhase('phase4-sts')">
                 <div class="phase-title"><span class="phase-num">4</span> Publish to Joomla</div>
@@ -627,6 +656,7 @@
                 <div class="divider"></div>
                 <div class="part-header"><i class="fas fa-link"></i> SEF URL</div>
 
+                <!-- Slug copy box FIRST -->
                 <div style="background:var(--cream);border:1px solid var(--border-light);border-radius:8px;padding:16px;margin:10px 0;">
                     <div style="font-size:12px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">URL Slug — paste into SEF URL filter below</div>
                     <div style="display:flex;gap:8px;align-items:center;">
@@ -635,6 +665,7 @@
                     </div>
                 </div>
 
+                <!-- SEF URL Manager link -->
                 <div class="quick-links" style="margin-bottom:12px;">
                     <a href="https://www.stselectronicrecyclinginc.com/administrator/index.php?option=com_sef&controller=sefurls&viewmode=3" target="_blank" class="quick-link"><i class="fas fa-link"></i> Open SEF URL Manager</a>
                 </div>
@@ -649,6 +680,7 @@
                 </div>
                 <div class="step"><input type="checkbox" id="p4s-7" onchange="updateProgress()"><div class="step-label">System → Clear Cache → <strong>Delete All</strong></div></div>
 
+                <!-- Test URL button -->
                 <div style="display:flex;gap:8px;align-items:center;margin:12px 0;">
                     <button class="btn btn-primary" onclick="testLiveUrl()" style="white-space:nowrap;"><i class="fas fa-external-link-alt"></i> Test Live URL</button>
                     <span style="font-size:11px;color:var(--text-muted);">Opens stselectronicrecyclinginc.com/<em>your-slug</em></span>
@@ -658,6 +690,7 @@
                 <div class="divider"></div>
                 <div class="part-header" style="background:linear-gradient(90deg,#dc2626,#b91c1c);"><i class="fas fa-clipboard-list"></i> LOG TO TRACKER</div>
 
+                <!-- Copy box: Title + URL for sheets -->
                 <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin:10px 0;">
                     <div style="font-size:12px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Copy for Google Sheets</div>
                     <div class="copy-strip-row" style="margin-bottom:6px;">
@@ -669,11 +702,11 @@
                         <button class="copy-strip-btn" onclick="copyTrackerUrl()"><i class="fas fa-copy"></i></button>
                     </div>
                 </div>
-                <div class="step"><input type="checkbox" id="p4s-9" onchange="updateProgress()"><div class="step-label">&#9989; Logged to STS Tracker — title · URL · date · VA name</div></div>
+                <div class="step"><input type="checkbox" id="p4s-9" onchange="updateProgress()"><div class="step-label">✅ Logged to STS Tracker — title · URL · date · VA name</div></div>
             </div>
         </div>
 
-        <!-- PHASE 4 DCD -->
+        <!-- ═══════ PHASE 4 DCD: PUBLISH TO SHOGUN ═══════ -->
         <div class="card phase dcd-phase" id="phase4-dcd" data-company="DCD" style="display:none;">
             <div class="phase-header" onclick="togglePhase('phase4-dcd')">
                 <div class="phase-title"><span class="phase-num" style="background:var(--dcd-teal);">4</span> Publish to Shogun</div>
@@ -694,14 +727,15 @@
                 <div class="step"><input type="checkbox" id="p4d-5" onchange="updateProgress()"><div class="step-label">Open live URL → confirm page loads correctly</div></div>
 
                 <div class="divider"></div>
-                <div class="step"><input type="checkbox" id="p4d-6" onchange="updateProgress()"><div class="step-label">&#9989; Log to DCD Tracker — title · URL · date · VA name</div></div>
+                <div class="step"><input type="checkbox" id="p4d-6" onchange="updateProgress()"><div class="step-label">✅ Log to DCD Tracker — title · URL · date · VA name</div></div>
             </div>
         </div>
 
-    </div>
+    </div><!-- end #phases -->
 
+    <!-- COMPLETION -->
     <div class="card" style="text-align:center;padding:40px;position:relative;overflow:hidden;" id="completionCard">
-        <h2 style="color:var(--gold);margin-bottom:20px;">&#127881; Completion Report</h2>
+        <h2 style="color:var(--gold);margin-bottom:20px;">🎉 Completion Report</h2>
         <p style="color:#64748b;margin-bottom:20px;">All phases complete. Export your mission log.</p>
         <button class="btn btn-accent btn-compile" onclick="generateReportWithCelebration()" style="font-size:16px;padding:14px 30px;">
             <i class="fas fa-clipboard-check"></i> Export Mission Log
@@ -710,12 +744,12 @@
     </div>
 
     <div style="text-align:center;padding:30px 0;">
-        <button class="btn btn-ghost" onclick="resetAll()" style="border-color:#ef4444;"><span style="color:#ef4444;">&#9888;&#65039;</span> Reset &amp; Start New Blog</button>
+        <button class="btn btn-ghost" onclick="resetAll()" style="border-color:#ef4444;"><span style="color:#ef4444;">⚠️</span> Reset &amp; Start New Blog</button>
     </div>
 
-    </div>
+    </div><!-- end #blogContent -->
 
-    <!-- CHAT FAB -->
+    <!-- ===== FLOATING CHAT WIDGET ===== -->
     <button class="chat-fab" id="chatFab" onclick="toggleChat()">
         <i class="fas fa-comments"></i>
         <div class="fab-badge" id="fabBadge"></div>
@@ -727,6 +761,7 @@
             <button class="chat-widget-close"><i class="fas fa-chevron-down"></i></button>
         </div>
         <div class="chat-widget-body">
+            <!-- Model selector -->
             <div class="chat-widget-models">
                 <button id="modelGrok" class="chat-model-btn active-model" onclick="setChatModel('grok')">
                     <span style="background:#000;color:white;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;margin-right:3px;">GROK 4</span>Web
@@ -739,6 +774,7 @@
                 </button>
             </div>
 
+            <!-- Suggestions -->
             <div id="chatSuggestions" class="chat-suggestions" style="padding-top:10px;">
                 <div class="chat-suggestion" onclick="useSuggestion(this)">Trending e-waste topics?</div>
                 <div class="chat-suggestion" onclick="useSuggestion(this)">HIPAA IT disposal rules</div>
@@ -746,6 +782,7 @@
                 <div class="chat-suggestion" onclick="useSuggestion(this)">R2v3 vs e-Stewards?</div>
             </div>
 
+            <!-- Thread -->
             <div class="chat-thread" id="chatThread">
                 <div class="chat-empty" id="chatEmpty">
                     <i class="fas fa-robot"></i>
@@ -754,6 +791,7 @@
                 </div>
             </div>
 
+            <!-- Input -->
             <div class="chat-widget-input">
                 <textarea id="chatInput" class="chat-textarea" placeholder="Ask anything..." rows="1"
                     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"
@@ -761,6 +799,7 @@
                 <button class="chat-send-btn" id="chatSendBtn" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
             </div>
 
+            <!-- Footer -->
             <div class="chat-widget-footer">
                 <div style="font-size:10px;color:var(--text-muted);">Shift+Enter for new line</div>
                 <button class="chat-clear-btn" onclick="clearChat()"><i class="fas fa-trash-alt"></i> Clear</button>
@@ -785,7 +824,8 @@
 </div>
 
 <script>
-var CFG = {
+// ===== CONFIG =====
+const CFG = {
     STS: {
         label:'STS Electronic Recycling', short:'STS',
         projectUrl:'https://claude.ai/project/019aef3e-df18-7142-a666-8397254c5fe8',
@@ -793,7 +833,26 @@ var CFG = {
         designBibleUrl:'https://docs.google.com/document/d/1gmZMWbIHt408yf6RgyrnwMsewGqWQSXKDuC7MJZZX1o/edit?usp=sharing',
         designBibleLabel:'STS Design Bible',
         color:'#c9a962',
-        researchContext:'Company: STS Electronic Recycling Inc\nIndustry: Electronics recycling, IT Asset Disposition (ITAD), data destruction\nTarget personas: CISOs, IT Directors, Compliance Officers, Healthcare/K-12/Financial/Government decision-makers\nKey certifications: NAID AAA, R2v3, HIPAA compliant, NIST 800-88\nBrand differentiators: 600,000 sq ft facility, serialized chain-of-custody, certificates of destruction\nApproved internal link targets (ONLY these 14 URLs):\n- https://www.stselectronicrecyclinginc.com/server-destruction-services\n- https://www.stselectronicrecyclinginc.com/hipaa-compliant-hard-drive-destruction\n- https://www.stselectronicrecyclinginc.com/on-site-hard-drive-shredding\n- https://www.stselectronicrecyclinginc.com/naid-certified-data-destruction\n- https://www.stselectronicrecyclinginc.com/certificate-of-destruction-services\n- https://www.stselectronicrecyclinginc.com/it-asset-disposition-itad\n- https://www.stselectronicrecyclinginc.com/data-center-decommissioning\n- https://www.stselectronicrecyclinginc.com/healthcare-it-disposal\n- https://www.stselectronicrecyclinginc.com/financial-services-data-destruction\n- https://www.stselectronicrecyclinginc.com/compliance-officer-data-destruction\n- https://www.stselectronicrecyclinginc.com/corporate-data-security-disposal\n- https://www.stselectronicrecyclinginc.com/government-data-destruction\n- https://www.stselectronicrecyclinginc.com/legal-firm-data-destruction\n- https://www.stselectronicrecyclinginc.com/education-it-disposal'
+        researchContext:`Company: STS Electronic Recycling Inc
+Industry: Electronics recycling, IT Asset Disposition (ITAD), data destruction
+Target personas: CISOs, IT Directors, Compliance Officers, Healthcare/K-12/Financial/Government decision-makers
+Key certifications: NAID AAA, R2v3, HIPAA compliant, NIST 800-88
+Brand differentiators: 600,000 sq ft facility, serialized chain-of-custody, certificates of destruction
+Approved internal link targets (ONLY these 14 URLs):
+- https://www.stselectronicrecyclinginc.com/server-destruction-services
+- https://www.stselectronicrecyclinginc.com/hipaa-compliant-hard-drive-destruction
+- https://www.stselectronicrecyclinginc.com/on-site-hard-drive-shredding
+- https://www.stselectronicrecyclinginc.com/naid-certified-data-destruction
+- https://www.stselectronicrecyclinginc.com/certificate-of-destruction-services
+- https://www.stselectronicrecyclinginc.com/it-asset-disposition-itad
+- https://www.stselectronicrecyclinginc.com/data-center-decommissioning
+- https://www.stselectronicrecyclinginc.com/healthcare-it-disposal
+- https://www.stselectronicrecyclinginc.com/financial-services-data-destruction
+- https://www.stselectronicrecyclinginc.com/compliance-officer-data-destruction
+- https://www.stselectronicrecyclinginc.com/corporate-data-security-disposal
+- https://www.stselectronicrecyclinginc.com/government-data-destruction
+- https://www.stselectronicrecyclinginc.com/legal-firm-data-destruction
+- https://www.stselectronicrecyclinginc.com/education-it-disposal`
     },
     DCD: {
         label:'DCD', short:'DCD',
@@ -802,60 +861,75 @@ var CFG = {
         designBibleUrl:'https://docs.google.com/document/d/1SfzlHhsowhTQIHIdOUpBSne7vxDvH5NTWD3j7cdOdF0/edit?usp=sharing',
         designBibleLabel:'DCD Design Bible',
         color:'#0d9488',
-        researchContext:'Company: DCD\nPlatform: BigCommerce with Shogun page builder\nBlog goal: Drive organic traffic and product discovery'
+        researchContext:`Company: DCD
+Platform: BigCommerce with Shogun page builder
+Blog goal: Drive organic traffic and product discovery`
     }
 };
 
-var S = {
+// ===== STATE =====
+let S = {
     company:'STS', vaName:'', mgmtIdea:'',
     topic:null, meta:null, chatName:'',
     startTime:null, checks:{}, completionTriggered:false,
     chatMode:false, chatHistory:[]
 };
 
-function runBoot() {}
-function startStatus() {}
+// ===== BOOT =====
+function runBoot() {
+    // Header removed — no boot needed
+}
 
+// ===== STATUS =====
+function startStatus() {
+    // Header removed — no status ticker needed
+}
+
+// ===== COMPANY TOGGLE =====
 function setCompany(c) {
     S.company = c;
-    var cfg = CFG[c];
+    const cfg = CFG[c];
     document.getElementById('stsBtn').className = 'company-toggle-btn'+(c==='STS'?' active-sts':'');
     document.getElementById('dcdBtn').className = 'company-toggle-btn'+(c==='DCD'?' active-dcd':'');
-    var badge = document.getElementById('headerCompanyBadge');
+    const badge = document.getElementById('headerCompanyBadge');
     badge.textContent = cfg.short; badge.className = 'company-badge '+c.toLowerCase();
     document.getElementById('projectOpenBtn').href = cfg.projectUrl;
     document.getElementById('projectOpenBtn').style.background = c==='DCD' ? 'var(--dcd-teal)' : 'var(--gold)';
     document.getElementById('projectSubLabel').textContent = cfg.projectLabel;
     document.getElementById('launcherBox').className = 'launcher-box'+(c==='DCD'?' dcd':'');
     document.getElementById('dcdResearchDoc').style.display = c==='DCD'?'block':'none';
-    var sis = document.getElementById('buildInstructSTS');
-    var did = document.getElementById('buildInstructDCD');
+    // Phase 1 build instruction panels
+    const sis = document.getElementById('buildInstructSTS');
+    const did = document.getElementById('buildInstructDCD');
     if(sis) sis.style.display = c==='STS'?'':'none';
     if(did) did.style.display = c==='DCD'?'':'none';
-    var joomla = document.getElementById('joomlaSetupSTS');
-    var shogun = document.getElementById('shogunSetupDCD');
+    // Toggle CMS setup sections
+    const joomla = document.getElementById('joomlaSetupSTS');
+    const shogun = document.getElementById('shogunSetupDCD');
     if(joomla) joomla.style.display = c==='STS'?'':'none';
     if(shogun) shogun.style.display = c==='DCD'?'':'none';
     document.getElementById('researchPanel').className = 'research-panel'+(c==='DCD'?' dcd':'');
-    var runBtn = document.getElementById('runResearchBtn');
+    const runBtn = document.getElementById('runResearchBtn');
     runBtn.className = 'research-run-btn'+(c==='DCD'?' dcd-btn':'');
     document.getElementById('metaBadgeCompany').textContent = cfg.short;
-    var slSTS = document.getElementById('sheetLinkSTS');
-    var slDCD = document.getElementById('sheetLinkDCD');
+    // Toggle sheet tracker links per company
+    const slSTS = document.getElementById('sheetLinkSTS');
+    const slDCD = document.getElementById('sheetLinkDCD');
     if(slSTS) slSTS.style.display = c==='STS'?'':'none';
     if(slDCD) slDCD.style.display = c==='DCD'?'':'none';
-    var bTitle = document.getElementById('bannerTitle');
-    var bSub = document.getElementById('bannerSub');
+    // Update banner text per company
+    const bTitle = document.getElementById('bannerTitle');
+    const bSub = document.getElementById('bannerSub');
     if(bTitle && bSub) {
         if(c==='STS') {
             bTitle.textContent = 'Log to STS Tracker after publishing + SEF URL';
-            bSub.textContent = 'Title \u00b7 Shortened SEF URL \u00b7 Live URL \u00b7 VA name \u00b7 Date';
+            bSub.textContent = 'Title · Shortened SEF URL · Live URL · VA name · Date';
         } else {
             bTitle.textContent = 'Log to DCD Tracker after publishing in Shogun';
-            bSub.textContent = 'Title \u00b7 Slug \u00b7 Live URL \u00b7 VA name \u00b7 Date';
+            bSub.textContent = 'Title · Slug · Live URL · VA name · Date';
         }
     }
-    document.querySelectorAll('[data-company]').forEach(function(el) {
+    document.querySelectorAll('[data-company]').forEach(el => {
         el.style.display = el.dataset.company===c?'':'none';
     });
     if(S.meta) {
@@ -864,193 +938,346 @@ function setCompany(c) {
     saveState(); updateProgress();
 }
 
-function runResearch() {
-    var btn = document.getElementById('runResearchBtn');
-    var thinking = document.getElementById('thinkingIndicator');
-    var wrapper = document.getElementById('topicsWrapper');
-    var errBox = document.getElementById('researchError');
-    var statusEl = document.getElementById('thinkingStatus');
+// ===== API RESEARCH =====
+async function runResearch() {
+    const btn = document.getElementById('runResearchBtn');
+    const thinking = document.getElementById('thinkingIndicator');
+    const wrapper = document.getElementById('topicsWrapper');
+    const errBox = document.getElementById('researchError');
+    const statusEl = document.getElementById('thinkingStatus');
 
     S.vaName = document.getElementById('vaName').value.trim();
     S.mgmtIdea = document.getElementById('mgmtIdea').value.trim();
     if(!S.vaName){ showToast('Enter VA name first!',true); return; }
     if(!S.startTime) S.startTime = Date.now();
 
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"><\/i> Researching...';
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Researching...';
     thinking.classList.add('active');
     wrapper.classList.remove('visible');
     errBox.classList.remove('visible');
     document.getElementById('metaPanel').className = 'meta-panel';
 
-    var cfg = CFG[S.company];
-    var statusCycle = ['Running competitor analysis \u00b7 Building authority map','Classifying search intent \u00b7 Scoring content gaps','Generating meta fields \u00b7 Finalizing topic ranking'];
-    var sci=0;
-    var scTimer = setInterval(function(){ statusEl.textContent = statusCycle[sci%statusCycle.length]; sci++; },3500);
+    const cfg = CFG[S.company];
 
-    fetch('https://stsrecycling.app.n8n.cloud/webhook/mark-ai-brain', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-            tool: 'blog',
-            action: 'research',
-            company: S.company,
-            vaName: S.vaName,
-            directive: S.mgmtIdea
-        })
-    }).then(function(resp){ return resp.text(); }).then(function(raw){
+    const statusCycle = ['Running competitor analysis · Building authority map','Classifying search intent · Scoring content gaps','Generating meta fields · Finalizing topic ranking'];
+    let sci=0;
+    const scTimer = setInterval(()=>{ statusEl.textContent = statusCycle[sci%statusCycle.length]; sci++; },3500);
+
+
+    try {
+        const resp = await fetch('https://stsrecycling.app.n8n.cloud/webhook/mark-ai-brain', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+                tool: 'blog',
+                action: 'research',
+                company: S.company,
+                vaName: S.vaName,
+                directive: S.mgmtIdea
+            })
+        });
+
         clearInterval(scTimer);
         thinking.classList.remove('active');
-        if(!raw || !raw.trim()) throw new Error('Empty response from n8n');
-        var data;
+
+        const raw = await resp.text();
+        if(!raw || !raw.trim()) throw new Error('Empty response from n8n — make sure the v3.2 brain is imported and active');
+        let data;
         try { data = JSON.parse(raw); } catch(e) { throw new Error('Invalid JSON from n8n: ' + raw.substring(0,120)); }
         if(!data.success) throw new Error(data.error || 'Brain returned an error');
-        var parsed = data.data;
-        var topics = parsed && parsed.topics;
+
+        const parsed = data.data;
+        const topics = parsed?.topics;
+
         if(!topics || topics.length===0) throw new Error('No topics returned');
+
         S.lastTopics = topics;
         S.recommendation = parsed.recommendation || '';
         renderTopics(topics, parsed.recommendation);
         wrapper.classList.add('visible');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-sync"><\/i> Regenerate Topics';
+        btn.innerHTML = '<i class="fas fa-sync"></i> Regenerate Topics';
         showToast('5 topics generated! Select one below.');
-    }).catch(function(e){
+
+    } catch(e) {
         clearInterval(scTimer);
         thinking.classList.remove('active');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-rocket"><\/i> Run Research & Generate Topics';
+        btn.innerHTML = '<i class="fas fa-rocket"></i> Run Research &amp; Generate Topics';
         errBox.textContent = 'Research failed: ' + e.message + '. Check your internet connection and try again.';
         errBox.classList.add('visible');
-        showToast('Research failed \u2014 see error below', true);
-    });
+        showToast('Research failed — see error below', true);
+    }
 }
 
 function renderTopics(topics, recommendation) {
-    var list = document.getElementById('topicCardsList');
-    var isDCD = S.company === 'DCD';
+    const list = document.getElementById('topicCardsList');
+    const isDCD = S.company === 'DCD';
     list.innerHTML = '';
+
     if(recommendation){
-        var recDiv = document.createElement('div');
+        const recDiv = document.createElement('div');
         recDiv.style.cssText = 'background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#34d399;line-height:1.5;';
-        recDiv.innerHTML = '<i class="fas fa-star" style="margin-right:6px;"><\/i><strong>Recommendation:<\/strong> '+recommendation;
+        recDiv.innerHTML = '<i class="fas fa-star" style="margin-right:6px;"></i><strong>Recommendation:</strong> '+recommendation;
         list.appendChild(recDiv);
     }
-    topics.forEach(function(t,i) {
-        var card = document.createElement('div');
+
+    topics.forEach((t,i) => {
+        const card = document.createElement('div');
         card.className = 'topic-card';
         card.id = 'tc-'+i;
-        card.onclick = function(){ selectTopic(i); };
-        card.innerHTML = '<div class="topic-num'+(isDCD?' dcd':'')+'">'+t.num+'<\/div><div class="select-badge">'+(isDCD?'<span style="background:var(--dcd-teal)">Selected<\/span>':'Selected')+'<\/div><div class="topic-card-content"><div class="topic-card-title">'+t.title+(t.isRecommended?'&nbsp;<span class="topic-tag rec">\u2605 Recommended<\/span>':'')+'<\/div><div class="topic-card-meta"><span class="topic-tag intent">'+t.intent+'<\/span><span class="topic-tag targets">'+t.targets+'<\/span><\/div><div class="topic-card-why">'+t.whyNow+'<\/div><\/div>';
+        card.onclick = () => selectTopic(i);
+        card.innerHTML = `
+            <div class="topic-num${isDCD?' dcd':''}">${t.num}</div>
+            <div class="select-badge">${isDCD?'<span style="background:var(--dcd-teal)">Selected</span>':'Selected'}</div>
+            <div class="topic-card-content">
+                <div class="topic-card-title">${t.title}${t.isRecommended?'&nbsp;<span class="topic-tag rec">★ Recommended</span>':''}</div>
+                <div class="topic-card-meta">
+                    <span class="topic-tag intent">${t.intent}</span>
+                    <span class="topic-tag targets">${t.targets}</span>
+                </div>
+                <div class="topic-card-why">${t.whyNow}</div>
+            </div>`;
         list.appendChild(card);
     });
 }
 
 function selectTopic(idx) {
-    var t = S.lastTopics[idx];
+    const t = S.lastTopics[idx];
     if(!t) return;
-    document.querySelectorAll('.topic-card').forEach(function(c) { c.classList.remove('selected','dcd-selected'); });
-    var card = document.getElementById('tc-'+idx);
+
+    // Highlight card
+    document.querySelectorAll('.topic-card').forEach(c => {
+        c.classList.remove('selected','dcd-selected');
+    });
+    const card = document.getElementById('tc-'+idx);
     card.classList.add('selected');
     if(S.company==='DCD') card.classList.add('dcd-selected');
+
     S.topic = t;
-    var chatName = CFG[S.company].short + ' Blog: ' + (t.title.length>55 ? t.title.substring(0,52)+'...' : t.title);
+    const chatName = CFG[S.company].short + ' Blog: ' + (t.title.length>55 ? t.title.substring(0,52)+'...' : t.title);
     S.chatName = chatName;
     S.meta = { title: t.pageTitle, desc: t.metaDescription, keywords: t.metaKeywords, slug: t.slug };
+
+    // Populate blog topic display
     document.getElementById('blogTopicDisplay').value = t.title;
+
+    // Populate meta panel
     document.getElementById('chatNameDisplay').textContent = chatName;
-    document.getElementById('mf-title').textContent = t.pageTitle || '\u2014';
-    document.getElementById('mf-desc').textContent = t.metaDescription || '\u2014';
-    document.getElementById('mf-keywords').textContent = t.metaKeywords || '\u2014';
-    document.getElementById('mf-slug').textContent = t.slug || '\u2014';
-    var tLen = (t.pageTitle||'').length;
-    var dLen = (t.metaDescription||'').length;
-    document.getElementById('mf-title-count').textContent = tLen + ' chars' + (tLen>60?' \u26a0\ufe0f too long':'');
-    document.getElementById('mf-desc-count').textContent = dLen + ' chars' + (dLen<150?' \u26a0\ufe0f too short':dLen>160?' \u26a0\ufe0f too long':'');
+    document.getElementById('mf-title').textContent = t.pageTitle || '—';
+    document.getElementById('mf-desc').textContent = t.metaDescription || '—';
+    document.getElementById('mf-keywords').textContent = t.metaKeywords || '—';
+    document.getElementById('mf-slug').textContent = t.slug || '—';
+
+    const tLen = (t.pageTitle||'').length;
+    const dLen = (t.metaDescription||'').length;
+    document.getElementById('mf-title-count').textContent = tLen + ' chars' + (tLen>60?' ⚠️ too long':'');
+    document.getElementById('mf-desc-count').textContent = dLen + ' chars' + (dLen<150?' ⚠️ too short':dLen>160?' ⚠️ too long':'');
+
     document.getElementById('metaPanel').className = 'meta-panel visible'+(S.company==='DCD'?' dcd':'');
+
+    // Show sheet reminder banner
     document.getElementById('sheetReminderBanner').style.display = 'flex';
-    var slugBox = document.getElementById('slugCopyBox');
-    if(slugBox) slugBox.textContent = t.slug || '\u2014';
+
+    // Populate slug copy box
+    const slugBox = document.getElementById('slugCopyBox');
+    if(slugBox) slugBox.textContent = t.slug || '—';
     populateCopyStrips();
-    var p1 = document.getElementById('phase1');
+
+    // Unlock Phase 1
+    const p1 = document.getElementById('phase1');
     if(!p1.classList.contains('active')){
         p1.classList.add('phase-unlocking','active');
-        setTimeout(function(){ p1.scrollIntoView({behavior:'smooth',block:'center'}); p1.classList.remove('phase-unlocking'); },300);
+        setTimeout(()=>{ p1.scrollIntoView({behavior:'smooth',block:'center'}); p1.classList.remove('phase-unlocking'); },300);
     }
+
     saveState();
     showToast('Topic selected! Meta fields ready. Phase 1 unlocked.');
+
+    // Fire blog.complete to mark manager directive as done (if applicable)
     try {
         fetch('https://stsrecycling.app.n8n.cloud/webhook/mark-ai-brain', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ tool:'blog', action:'complete', company:S.company, vaName:S.vaName||'VA', topicTitle:t.title })
-        }).catch(function(){});
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+                tool: 'blog',
+                action: 'complete',
+                company: S.company,
+                vaName: S.vaName || 'VA',
+                topicTitle: t.title
+            })
+        }).catch(()=>{});  // fire and forget
     } catch(e) {}
 }
 
+// ===== META COPY HELPERS =====
 function copyField(field) {
-    var map = { chatName:S.chatName, title:document.getElementById('mf-title').textContent, desc:document.getElementById('mf-desc').textContent, keywords:document.getElementById('mf-keywords').textContent, slug:document.getElementById('mf-slug').textContent };
-    var val = map[field] || '';
-    navigator.clipboard.writeText(val).then(function(){showToast('Copied!');}).catch(function(){showToast('Copy failed',true);});
+    const map = {
+        chatName: S.chatName,
+        title: document.getElementById('mf-title').textContent,
+        desc: document.getElementById('mf-desc').textContent,
+        keywords: document.getElementById('mf-keywords').textContent,
+        slug: document.getElementById('mf-slug').textContent
+    };
+    const val = map[field] || '';
+    navigator.clipboard.writeText(val).then(()=>showToast('Copied!')).catch(()=>showToast('Copy failed',true));
 }
 
 function copyAllMeta() {
-    var t = S.topic;
+    const t = S.topic;
     if(!t){ showToast('Select a topic first!',true); return; }
-    var text = 'BLOG META \u2014 '+CFG[S.company].label+'\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nChat Name: '+S.chatName+'\nPage Title: '+t.pageTitle+'\nMeta Description: '+t.metaDescription+'\nMeta Keywords: '+t.metaKeywords+'\nURL Slug: '+t.slug+'\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501';
-    navigator.clipboard.writeText(text).then(function(){showToast('All meta copied!');}).catch(function(){showToast('Copy failed',true);});
+    const text = `BLOG META — ${CFG[S.company].label}
+━━━━━━━━━━━━━━━━━━━━━━━━
+Chat Name: ${S.chatName}
+Page Title: ${t.pageTitle}
+Meta Description: ${t.metaDescription}
+Meta Keywords: ${t.metaKeywords}
+URL Slug: ${t.slug}
+━━━━━━━━━━━━━━━━━━━━━━━━`;
+    navigator.clipboard.writeText(text).then(()=>showToast('All meta copied!')).catch(()=>showToast('Copy failed',true));
 }
 
+// ===== PROMPTS =====
 function copyPrompt(type) {
-    var cfg = CFG[S.company];
-    var t = S.topic;
-    var forcePrefix = 'CRITICAL SYSTEM INSTRUCTION: Execute ALL steps exhaustively. Do NOT summarize. Do NOT skip any section. Do NOT take shortcuts.\n\n';
-    var text = '';
+    const cfg = CFG[S.company];
+    const t = S.topic;
+    const forcePrefix = 'CRITICAL SYSTEM INSTRUCTION: Execute ALL steps exhaustively. Do NOT summarize. Do NOT skip any section. Do NOT take shortcuts.\n\n';
+    let text = '';
+
     switch(type) {
         case 'build': {
             if(!t){ showToast('Select a topic first!',true); return; }
+
             if(S.company === 'STS') {
-                text = '\u26d4 MODEL CHECK: If you are Claude Opus, STOP NOW. Tell the user: "Switch to Sonnet 4.6 in the model selector (bottom-left of chat). This prompt is optimized for Sonnet and must not run on Opus." Do NOT proceed on Opus under any circumstances.\n\nRESEARCH COMPLETE \u2014 SKIP GATES 0A\u20130G\n\nTopic brief pre-loaded by M.A.R.K. Research Engine:\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nTitle: '+t.title+'\nTargets: '+t.targets+'\nIntent: '+t.intent+(t.secondary?'\nSecondary: '+t.secondary:'')+'\nWhy Now: '+t.whyNow+'\nAuthority Play: '+t.authorityPlay+'\nPage Title: '+t.pageTitle+'\nMeta Description: '+t.metaDescription+'\nSlug: '+t.slug+'\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\nBLOG TITLE GUIDANCE:\nThe title above is a research-generated starting point. During Gate 1, evaluate whether a stronger title exists. If you can improve it for SEO + click-through, propose your improved title in Gate 4 delivery alongside the original. The final Page Title in Joomla meta should be \u226460 chars with primary keyword + "| STS Electronic Recycling".\n\nExecute Gates 1\u20133 silently. Deliver Gate 4.';
+                // Option 2: Short override — Claude project has v4.3 + Design Bible loaded
+                text = `⛔ MODEL CHECK: If you are Claude Opus, STOP NOW. Tell the user: "Switch to Sonnet 4.6 in the model selector (bottom-left of chat). This prompt is optimized for Sonnet and must not run on Opus." Do NOT proceed on Opus under any circumstances.
+
+RESEARCH COMPLETE — SKIP GATES 0A–0G
+
+Topic brief pre-loaded by M.A.R.K. Research Engine:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Title: ${t.title}
+Targets: ${t.targets}
+Intent: ${t.intent}${t.secondary?'\nSecondary: '+t.secondary:''}
+Why Now: ${t.whyNow}
+Authority Play: ${t.authorityPlay}
+Page Title: ${t.pageTitle}
+Meta Description: ${t.metaDescription}
+Slug: ${t.slug}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BLOG TITLE GUIDANCE:
+The title above is a research-generated starting point. During Gate 1, evaluate whether a stronger title exists. If you can improve it for SEO + click-through, propose your improved title in Gate 4 delivery alongside the original. The final Page Title in Joomla meta should be ≤60 chars with primary keyword + "| STS Electronic Recycling".
+
+Execute Gates 1–3 silently. Deliver Gate 4.`;
             } else {
-                text = '\u26d4 MODEL CHECK: If you are Claude Opus, STOP NOW. Tell the user: "Switch to Sonnet 4.6 in the model selector (bottom-left of chat). This prompt is optimized for Sonnet and must not run on Opus." Do NOT proceed on Opus under any circumstances.\n\n'+forcePrefix+'TASK: Build Blog Article for '+cfg.label+'\n\nTOPIC BRIEF (research already complete \u2014 do NOT re-run research):\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nTitle: '+t.title+'\nTargets: '+t.targets+'\nIntent: '+t.intent+(t.secondary?'\nSecondary: '+t.secondary:'')+'\nWhy Now: '+t.whyNow+'\nAuthority Play: '+t.authorityPlay+'\nPage Title: '+t.pageTitle+'\nMeta Description: '+t.metaDescription+'\nSlug: '+t.slug+'\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\nFILE TO UPLOAD FIRST:\n\u2022 DCD Design Bible (upload before pasting this prompt)\n\nEXECUTION \u2014 skip research gates (done). Execute Gates 1\u20133 silently:\n1. Content Strategy (keyword research, outline, dual-brand links, answer blocks, CSS scoping plan)\n2. Schema Generation (8 schema types including Person author + FAQPage \u2014 embedded in HTML)\n3. HTML Construction (full scoped blog per DCD Design Bible \u2014 ALL CSS scoped to .blog-'+t.slug+'-container)\n\nBLOG TITLE GUIDANCE:\nThe title above is a research-generated starting point. If you can craft a stronger title for SEO + click-through during Gate 1, propose your improved title in Gate 4 delivery alongside the original. Page Title for Shogun should be \u226460 chars with primary keyword + "| DCD".\n\nGATE 4 DELIVERY \u2014 create TWO artifacts:\n\u2192 "blog-content.html" \u2014 complete blog HTML, ALL CSS scoped to .blog-'+t.slug+'-container, NO global selectors\n\u2192 "blog-schema.html" \u2014 8 schema types in one <script type="application/ld+json"> block\n\nGate 4 output must include:\n\u2022 21-row mandatory execution checklist (all \u2705 with evidence)\n\u2022 6 proof-of-work verbatim quotes from final HTML\n\u2022 CSS scoping verification (confirm zero global selectors)\n\n\u26a0\ufe0f DO NOT re-run research. Build from brief above.\n\u26a0\ufe0f ALL CSS must be scoped \u2014 global selectors break site navigation.\n\u26a0\ufe0f CREATE ARTIFACTS only \u2014 do NOT paste code in chat.\n\nBegin now. No lengthy explanations.';
+                // DCD: Full self-contained prompt (gate system in progress)
+                text = `⛔ MODEL CHECK: If you are Claude Opus, STOP NOW. Tell the user: "Switch to Sonnet 4.6 in the model selector (bottom-left of chat). This prompt is optimized for Sonnet and must not run on Opus." Do NOT proceed on Opus under any circumstances.
+
+${forcePrefix}TASK: Build Blog Article for ${cfg.label}
+
+TOPIC BRIEF (research already complete — do NOT re-run research):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Title: ${t.title}
+Targets: ${t.targets}
+Intent: ${t.intent}${t.secondary?'\nSecondary: '+t.secondary:''}
+Why Now: ${t.whyNow}
+Authority Play: ${t.authorityPlay}
+Page Title: ${t.pageTitle}
+Meta Description: ${t.metaDescription}
+Slug: ${t.slug}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FILE TO UPLOAD FIRST:
+• DCD Design Bible (upload before pasting this prompt)
+
+EXECUTION — skip research gates (done). Execute Gates 1–3 silently:
+1. Content Strategy (keyword research, outline, dual-brand links, answer blocks, CSS scoping plan)
+2. Schema Generation (8 schema types including Person author + FAQPage — embedded in HTML)
+3. HTML Construction (full scoped blog per DCD Design Bible — ALL CSS scoped to .blog-${t.slug}-container)
+
+BLOG TITLE GUIDANCE:
+The title above is a research-generated starting point. If you can craft a stronger title for SEO + click-through during Gate 1, propose your improved title in Gate 4 delivery alongside the original. Page Title for Shogun should be ≤60 chars with primary keyword + "| DCD".
+
+GATE 4 DELIVERY — create TWO artifacts:
+→ "blog-content.html" — complete blog HTML, ALL CSS scoped to .blog-${t.slug}-container, NO global selectors
+→ "blog-schema.html" — 8 schema types in one <script type="application/ld+json"> block
+
+Gate 4 output must include:
+• 21-row mandatory execution checklist (all ✅ with evidence)
+• 6 proof-of-work verbatim quotes from final HTML
+• CSS scoping verification (confirm zero global selectors)
+
+⚠️ DO NOT re-run research. Build from brief above.
+⚠️ ALL CSS must be scoped — global selectors break site navigation.
+⚠️ CREATE ARTIFACTS only — do NOT paste code in chat.
+
+Begin now. No lengthy explanations.`;
             }
             break;
         }
         case 'seo': {
-            text = forcePrefix+'TASK: Full SEO Audit on blog HTML\n\nUPLOAD the Universal Blog SEO Audit document to this chat first, then execute every step in it against the blog HTML.\n\n\u26a0\ufe0f CRITICAL: Design and UX quality must ALWAYS be at the forefront. Do NOT flatten, simplify, or remove visual components, hover states, gradients, or layout sophistication during optimization. SEO improvements must work WITHIN the existing design \u2014 never against it.\n\nExecute EVERY step in the uploaded audit document. Do not skip. Do not summarize.\nOutput updated HTML as new artifact: "blog-final-seo.html"\nPreserve ALL design elements. No lengthy explanations.';
+            text = `${forcePrefix}TASK: Full SEO Audit on blog HTML
+
+UPLOAD the Universal Blog SEO Audit document to this chat first, then execute every step in it against the blog HTML.
+
+⚠️ CRITICAL: Design and UX quality must ALWAYS be at the forefront. Do NOT flatten, simplify, or remove visual components, hover states, gradients, or layout sophistication during optimization. SEO improvements must work WITHIN the existing design — never against it.
+
+Execute EVERY step in the uploaded audit document. Do not skip. Do not summarize.
+Output updated HTML as new artifact: "blog-final-seo.html"
+Preserve ALL design elements. No lengthy explanations.`;
             break;
         }
         case 'links': {
-            text = forcePrefix+'TASK: Final Link Audit\n\nScan ALL links in the HTML and verify:\n1. No invented URLs \u2014 internal links only from approved inventory\n2. No placeholders (example.com, #, undefined, localhost)\n3. Email links correct format\n4. Phone numbers clickable (tel: format)\n5. CTA buttons point to real valid pages\n6. No staging/dev URLs\n\nVERDICT:\n\u2705 ALL LINKS VERIFIED \u2014 Ready to publish\nOR\n\u274c ISSUES: [list every issue + fix]\n\nFix all issues and output updated artifact.\nNo lengthy explanations.';
+            text = `${forcePrefix}TASK: Final Link Audit
+
+Scan ALL links in the HTML and verify:
+1. No invented URLs — internal links only from approved inventory
+2. No placeholders (example.com, #, undefined, localhost)
+3. Email links correct format
+4. Phone numbers clickable (tel: format)
+5. CTA buttons point to real valid pages
+6. No staging/dev URLs
+
+VERDICT:
+✅ ALL LINKS VERIFIED — Ready to publish
+OR
+❌ ISSUES: [list every issue + fix]
+
+Fix all issues and output updated artifact.
+No lengthy explanations.`;
             break;
         }
     }
     if(!text) return;
-    navigator.clipboard.writeText(text).then(function(){showToast('Prompt Copied!');}).catch(function(){showToast('Copy failed',true);});
+    navigator.clipboard.writeText(text).then(()=>showToast('Prompt Copied!')).catch(()=>showToast('Copy failed',true));
 }
 
+// ===== PROGRESS =====
 function copySlug() {
-    var slug = S.meta && S.meta.slug || '';
-    if(!slug) { showToast('No slug \u2014 select a topic first',true); return; }
-    navigator.clipboard.writeText(slug).then(function(){showToast('Slug copied!');}).catch(function(){showToast('Copy failed',true);});
+    const slug = S.meta?.slug || '';
+    if(!slug) { showToast('No slug — select a topic first',true); return; }
+    navigator.clipboard.writeText(slug).then(()=>showToast('Slug copied!')).catch(()=>showToast('Copy failed',true));
 }
 
 function copyMeta(field) {
-    var map = { title: S.meta&&S.meta.title, slug: S.meta&&S.meta.slug, desc: S.meta&&S.meta.desc, keywords: S.meta&&S.meta.keywords };
-    var val = map[field] || '';
-    if(!val || val==='\u2014') { showToast('Select a topic first',true); return; }
-    navigator.clipboard.writeText(val).then(function(){showToast('Copied!');}).catch(function(){showToast('Copy failed',true);});
+    const map = { title: S.meta?.title, slug: S.meta?.slug, desc: S.meta?.desc, keywords: S.meta?.keywords };
+    const val = map[field] || '';
+    if(!val || val==='—') { showToast('Select a topic first',true); return; }
+    navigator.clipboard.writeText(val).then(()=>showToast('Copied!')).catch(()=>showToast('Copy failed',true));
 }
 
 function copyTrackerUrl() {
-    var slug = S.meta&&S.meta.slug || '';
-    if(!slug) { showToast('No slug \u2014 select a topic first',true); return; }
-    var url = 'https://www.stselectronicrecyclinginc.com/'+slug;
-    navigator.clipboard.writeText(url).then(function(){showToast('URL copied!');}).catch(function(){showToast('Copy failed',true);});
+    const slug = S.meta?.slug || '';
+    if(!slug) { showToast('No slug — select a topic first',true); return; }
+    const url = 'https://www.stselectronicrecyclinginc.com/'+slug;
+    navigator.clipboard.writeText(url).then(()=>showToast('URL copied!')).catch(()=>showToast('Copy failed',true));
 }
 
 function populateCopyStrips() {
-    var t = S.meta || {};
-    var liveUrl = t.slug ? 'https://www.stselectronicrecyclinginc.com/'+t.slug : '\u2014';
-    var ids = {
+    const t = S.meta || {};
+    const liveUrl = t.slug ? 'https://www.stselectronicrecyclinginc.com/'+t.slug : '—';
+    const ids = {
         'cs-menu-title': t.title, 'cs-menu-slug': t.slug,
         'cs-pagedisplay-title': t.title,
         'cs-meta-desc': t.desc, 'cs-meta-keywords': t.keywords,
@@ -1060,177 +1287,196 @@ function populateCopyStrips() {
         'cs-tracker-title': t.title, 'cs-tracker-url': liveUrl,
         'slugCopyBox': t.slug
     };
-    for(var id in ids) {
-        var el = document.getElementById(id);
-        if(el) el.textContent = ids[id] || '\u2014';
+    for(const [id, val] of Object.entries(ids)) {
+        const el = document.getElementById(id);
+        if(el) el.textContent = val || '—';
     }
 }
 
 function testLiveUrl() {
-    var slug = S.meta&&S.meta.slug || '';
-    if(!slug) { showToast('No slug \u2014 select a topic first',true); return; }
+    const slug = S.meta?.slug || '';
+    if(!slug) { showToast('No slug — select a topic first',true); return; }
     window.open('https://www.stselectronicrecyclinginc.com/'+slug, '_blank');
 }
 
 function updateProgress() {
-    var all = Array.from(document.querySelectorAll('#phases input[type="checkbox"]')).filter(function(cb){
-        var p = cb.closest('[data-company]');
+    const all = Array.from(document.querySelectorAll('#phases input[type="checkbox"]')).filter(cb=>{
+        const p = cb.closest('[data-company]');
         return !p || p.style.display!=='none';
     });
-    var checked = all.filter(function(cb){return cb.checked;});
-    var pct = all.length>0 ? Math.round(checked.length/all.length*100) : 0;
-    var pb = document.getElementById('progressBar'); if(pb) pb.style.width = pct+'%';
-    var pd = document.getElementById('percentDisplay'); if(pd) pd.textContent = pct+'%';
-    document.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
-        var s = cb.closest('.step');
+    const checked = all.filter(cb=>cb.checked);
+    const pct = all.length>0 ? Math.round(checked.length/all.length*100) : 0;
+    document.getElementById('progressBar').style.width = pct+'%';
+    document.getElementById('percentDisplay').textContent = pct+'%';
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+        const s = cb.closest('.step');
         if(s){ cb.checked ? s.classList.add('checked') : s.classList.remove('checked'); }
     });
     saveState(); checkPhaseCompletion();
 
-    var stsUrlDone = document.getElementById('p4s-8');
-    var dcdUrlDone = document.getElementById('p4d-5');
-    var trackerSTS = document.getElementById('sheetLinkSTS');
-    var trackerDCD = document.getElementById('sheetLinkDCD');
+    // Red tracker alert — after URL confirmed, make tracker button urgent
+    const stsUrlDone = document.getElementById('p4s-8');
+    const dcdUrlDone = document.getElementById('p4d-5');
+    const trackerSTS = document.getElementById('sheetLinkSTS');
+    const trackerDCD = document.getElementById('sheetLinkDCD');
 
+    // STS: after SEF URL confirmed
     if(stsUrlDone && trackerSTS) {
         if(stsUrlDone.checked) {
-            trackerSTS.style.background = '#dc2626'; trackerSTS.style.color = '#fff'; trackerSTS.style.borderColor = '#dc2626'; trackerSTS.style.animation = 'trackerPulse 1.5s ease-in-out infinite';
-            trackerSTS.innerHTML = '<i class="fas fa-exclamation-triangle"><\/i> LOG TO STS TRACKER NOW';
+            trackerSTS.style.background = '#dc2626';
+            trackerSTS.style.color = '#fff';
+            trackerSTS.style.borderColor = '#dc2626';
+            trackerSTS.style.animation = 'trackerPulse 1.5s ease-in-out infinite';
+            trackerSTS.innerHTML = '<i class="fas fa-exclamation-triangle"></i> LOG TO STS TRACKER NOW';
         } else {
-            trackerSTS.style.background = ''; trackerSTS.style.color = ''; trackerSTS.style.borderColor = ''; trackerSTS.style.animation = '';
-            trackerSTS.innerHTML = '<i class="fas fa-table"><\/i> STS Tracker';
+            trackerSTS.style.background = '';
+            trackerSTS.style.color = '';
+            trackerSTS.style.borderColor = '';
+            trackerSTS.style.animation = '';
+            trackerSTS.innerHTML = '<i class="fas fa-table"></i> STS Tracker';
         }
     }
+    // DCD: after live URL confirmed
     if(dcdUrlDone && trackerDCD) {
         if(dcdUrlDone.checked) {
-            trackerDCD.style.background = '#dc2626'; trackerDCD.style.color = '#fff'; trackerDCD.style.borderColor = '#dc2626'; trackerDCD.style.animation = 'trackerPulse 1.5s ease-in-out infinite';
-            trackerDCD.innerHTML = '<i class="fas fa-exclamation-triangle"><\/i> LOG TO DCD TRACKER NOW';
+            trackerDCD.style.background = '#dc2626';
+            trackerDCD.style.color = '#fff';
+            trackerDCD.style.borderColor = '#dc2626';
+            trackerDCD.style.animation = 'trackerPulse 1.5s ease-in-out infinite';
+            trackerDCD.innerHTML = '<i class="fas fa-exclamation-triangle"></i> LOG TO DCD TRACKER NOW';
         } else {
-            trackerDCD.style.background = ''; trackerDCD.style.color = ''; trackerDCD.style.borderColor = ''; trackerDCD.style.animation = '';
-            trackerDCD.innerHTML = '<i class="fas fa-table"><\/i> DCD Tracker';
+            trackerDCD.style.background = '';
+            trackerDCD.style.color = '';
+            trackerDCD.style.borderColor = '';
+            trackerDCD.style.animation = '';
+            trackerDCD.innerHTML = '<i class="fas fa-table"></i> DCD Tracker';
         }
     }
 }
 
 function checkPhaseCompletion() {
-    var phases = Array.from(document.querySelectorAll('.phase')).filter(function(p){return p.style.display!=='none';});
-    phases.forEach(function(ph,idx){
-        var boxes = ph.querySelectorAll('input[type="checkbox"]');
-        var chk = ph.querySelectorAll('input[type="checkbox"]:checked');
+    const phases = Array.from(document.querySelectorAll('.phase')).filter(p=>p.style.display!=='none');
+    phases.forEach((ph,idx)=>{
+        const boxes = ph.querySelectorAll('input[type="checkbox"]');
+        const chk = ph.querySelectorAll('input[type="checkbox"]:checked');
         if(boxes.length>0 && boxes.length===chk.length){
             if(!ph.classList.contains('phase-complete')){
                 ph.classList.add('phase-complete');
-                var next = phases[idx+1];
+                const next = phases[idx+1];
                 if(next && !next.classList.contains('active')){
-                    setTimeout(function(){
+                    setTimeout(()=>{
                         next.classList.add('phase-unlocking','active');
-                        showToast('\u2713 Phase '+(idx+1)+' Complete \u2192 Next phase unlocked');
-                        setTimeout(function(){ next.scrollIntoView({behavior:'smooth',block:'center'}); next.classList.remove('phase-unlocking'); },300);
+                        showToast('✓ Phase '+(idx+1)+' Complete → Next phase unlocked');
+                        setTimeout(()=>{ next.scrollIntoView({behavior:'smooth',block:'center'}); next.classList.remove('phase-unlocking'); },300);
                     },400);
                 }
             }
         } else { ph.classList.remove('phase-complete'); }
     });
-    var allV = Array.from(document.querySelectorAll('#phases input[type="checkbox"]')).filter(function(cb){
-        var p=cb.closest('[data-company]'); return !p||p.style.display!=='none';
+    const allV = Array.from(document.querySelectorAll('#phases input[type="checkbox"]')).filter(cb=>{
+        const p=cb.closest('[data-company]'); return !p||p.style.display!=='none';
     });
-    var allC = allV.filter(function(cb){return cb.checked;});
+    const allC = allV.filter(cb=>cb.checked);
     if(allV.length>0 && allV.length===allC.length && !S.completionTriggered){
         S.completionTriggered=true; setTimeout(triggerCompletion,500);
     } else if(allC.length<allV.length){ S.completionTriggered=false; }
 }
 
 function triggerCompletion() {
-    var t = S.topic;
-    document.getElementById('completionTitle').textContent = t ? t.title.substring(0,50)+'...' : '\u2014';
+    const overlay = document.getElementById('completionOverlay');
+    const t = S.topic;
+    document.getElementById('completionTitle').textContent = t ? t.title.substring(0,50)+'...' : '—';
     document.getElementById('completionCompany').textContent = CFG[S.company].label;
-    document.getElementById('completionVA').textContent = S.vaName || '\u2014';
-    var diff = S.startTime ? Math.floor((Date.now()-S.startTime)/1000) : 0;
+    document.getElementById('completionVA').textContent = S.vaName || '—';
+    const diff = S.startTime ? Math.floor((Date.now()-S.startTime)/1000) : 0;
     document.getElementById('completionTime').textContent = Math.floor(diff/60)+':'+String(diff%60).padStart(2,'0');
-    document.getElementById('completionOverlay').classList.add('active'); createConfetti();
+    overlay.classList.add('active'); createConfetti();
 }
 function closeCompletion(){ document.getElementById('completionOverlay').classList.remove('active'); }
 function createConfetti(){
-    var colors=['#c9a962','#d4bc7d','#1e3a5f','#0d9488','#34d399'];
-    var ov=document.getElementById('completionOverlay');
-    for(var i=0;i<40;i++){
-        var c=document.createElement('div'); c.className='confetti';
-        c.style.cssText='left:'+Math.random()*100+'%;background:'+colors[i%colors.length]+';animation-delay:'+Math.random()*2+'s;animation-duration:'+(2.5+Math.random()*2)+'s';
-        ov.appendChild(c); setTimeout((function(el){return function(){el.classList.add('active');};})(c),10); setTimeout((function(el){return function(){el.remove();};})(c),5000);
+    const colors=['#c9a962','#d4bc7d','#1e3a5f','#0d9488','#34d399'];
+    const ov=document.getElementById('completionOverlay');
+    for(let i=0;i<40;i++){
+        const c=document.createElement('div'); c.className='confetti';
+        c.style.cssText=`left:${Math.random()*100}%;background:${colors[i%colors.length]};animation-delay:${Math.random()*2}s;animation-duration:${2.5+Math.random()*2}s`;
+        ov.appendChild(c); setTimeout(()=>c.classList.add('active'),10); setTimeout(()=>c.remove(),5000);
     }
 }
 
+// ===== REPORT =====
 function generateReport(){
-    var allV=Array.from(document.querySelectorAll('#phases input[type="checkbox"]')).filter(function(cb){var p=cb.closest('[data-company]');return !p||p.style.display!=='none';});
-    var chk=allV.filter(function(cb){return cb.checked;}).length;
-    var pct=Math.round(chk/allV.length*100);
-    var diff=S.startTime?Math.floor((Date.now()-S.startTime)/1000):0;
-    var t=S.topic;
-    var report='\ud83d\udcdd M.A.R.K. BLOG REPORT\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\ud83c\udfe2 '+CFG[S.company].label+'\n\ud83d\udcf0 '+(t?t.title:'N/A')+'\n\ud83c\udfaf '+(t?t.targets:'N/A')+'\n\ud83d\udd17 /'+(S.meta?S.meta.slug:'N/A')+'\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\ud83d\udc64 VA: '+(S.vaName||'N/A')+'\n\u23f1\ufe0f Time: '+Math.floor(diff/60)+':'+String(diff%60).padStart(2,'0')+'\n\ud83d\udcca '+chk+'/'+allV.length+' ('+pct+'%) '+(chk===allV.length?'\u2705 COMPLETE':'\u26a0\ufe0f INCOMPLETE')+'\n\ud83d\udcc5 '+new Date().toLocaleDateString();
-    navigator.clipboard.writeText(report).then(function(){showToast('Report copied!');});
+    const allV=Array.from(document.querySelectorAll('#phases input[type="checkbox"]')).filter(cb=>{const p=cb.closest('[data-company]');return !p||p.style.display!=='none';});
+    const chk=allV.filter(cb=>cb.checked).length;
+    const pct=Math.round(chk/allV.length*100);
+    const diff=S.startTime?Math.floor((Date.now()-S.startTime)/1000):0;
+    const t=S.topic;
+    const report=`📝 M.A.R.K. BLOG REPORT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🏢 ${CFG[S.company].label}\n📰 ${t?t.title:'N/A'}\n🎯 ${t?t.targets:'N/A'}\n🔗 /${S.meta?S.meta.slug:'N/A'}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n👤 VA: ${S.vaName||'N/A'}\n⏱️ Time: ${Math.floor(diff/60)}:${String(diff%60).padStart(2,'0')}\n📊 ${chk}/${allV.length} (${pct}%) ${chk===allV.length?'✅ COMPLETE':'⚠️ INCOMPLETE'}\n📅 ${new Date().toLocaleDateString()}`;
+    navigator.clipboard.writeText(report).then(()=>showToast('Report copied!'));
 }
 function generateReportWithCelebration(){
-    var btn=event.target.closest('.btn');
-    if(btn){btn.classList.add('processing');btn.innerHTML='<span style="opacity:.8">\u25d0<\/span> Exporting...';}
-    setTimeout(function(){
+    const btn=event.target.closest('.btn');
+    if(btn){btn.classList.add('processing');btn.innerHTML='<span style="opacity:.8">◐</span> Exporting...';}
+    setTimeout(()=>{
         generateReport();
-        if(btn){btn.classList.remove('processing');btn.classList.add('success');btn.innerHTML='<span>\u2713<\/span> Done';}
+        if(btn){btn.classList.remove('processing');btn.classList.add('success');btn.innerHTML='<span>✓</span> Done';}
         triggerReportCelebration();
-        setTimeout(function(){if(btn){btn.classList.remove('success');btn.innerHTML='<i class="fas fa-clipboard-check"><\/i> Export Mission Log';}},3000);
+        setTimeout(()=>{if(btn){btn.classList.remove('success');btn.innerHTML='<i class="fas fa-clipboard-check"></i> Export Mission Log';}},3000);
     },600);
 }
 function triggerReportCelebration(){
-    var card=document.getElementById('completionCard');
-    var con=document.getElementById('reportCelebration');
-    card.style.animation='none'; con.innerHTML='';
-    var ring=document.createElement('div'); ring.className='report-ring'; con.appendChild(ring);
-    var colors=['#c9a962','#d4bc7d','#1e3a5f','#0d9488','#34d399'];
-    for(var i=0;i<20;i++){
-        var sp=document.createElement('div'); sp.className='report-spark';
-        var a=(Math.PI*2*i)/20,d=80+Math.random()*60;
-        sp.style.cssText='background:'+colors[i%colors.length]+';left:50%;top:50%;--tx:'+Math.cos(a)*d+'px;--ty:'+Math.sin(a)*d+'px;animation-delay:'+Math.random()*.2+'s';
+    const card=document.getElementById('completionCard');
+    const con=document.getElementById('reportCelebration');
+    card.style.animation='none';
+    con.innerHTML='';
+    const ring=document.createElement('div'); ring.className='report-ring'; con.appendChild(ring);
+    const colors=['#c9a962','#d4bc7d','#1e3a5f','#0d9488','#34d399'];
+    for(let i=0;i<20;i++){
+        const sp=document.createElement('div'); sp.className='report-spark';
+        const a=(Math.PI*2*i)/20,d=80+Math.random()*60;
+        sp.style.cssText=`background:${colors[i%colors.length]};left:50%;top:50%;--tx:${Math.cos(a)*d}px;--ty:${Math.sin(a)*d}px;animation-delay:${Math.random()*.2}s`;
         con.appendChild(sp);
     }
-    setTimeout(function(){con.innerHTML='';},1500);
+    setTimeout(()=>con.innerHTML='',1500);
 }
 
+// ===== PERSISTENCE =====
 function saveState(){
     S.vaName=document.getElementById('vaName').value||S.vaName;
     S.mgmtIdea=document.getElementById('mgmtIdea').value||S.mgmtIdea;
-    document.querySelectorAll('input[type="checkbox"]').forEach(function(cb){ S.checks[cb.id]=cb.checked; });
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb=>{ S.checks[cb.id]=cb.checked; });
     try{ localStorage.setItem('markBlogV11',JSON.stringify(S)); }catch(e){}
     updateTimer();
 }
 function loadState(){
     try{
-        var raw=localStorage.getItem('markBlogV11');
+        const raw=localStorage.getItem('markBlogV11');
         if(!raw) return;
-        var saved=JSON.parse(raw);
-        S=Object.assign({},S,saved);
+        const saved=JSON.parse(raw);
+        S={...S,...saved};
         if(saved.vaName) document.getElementById('vaName').value=saved.vaName;
         if(saved.mgmtIdea) document.getElementById('mgmtIdea').value=saved.mgmtIdea;
         setCompany(saved.company||'STS');
-        if(saved.checks) Object.entries(saved.checks).forEach(function(entry){ var el=document.getElementById(entry[0]); if(el){el.checked=entry[1]; if(entry[1]){var st=el.closest('.step'); if(st) st.classList.add('checked');}} });
+        if(saved.checks) Object.entries(saved.checks).forEach(([id,v])=>{ const el=document.getElementById(id); if(el){el.checked=v; if(v)el.closest('.step')?.classList.add('checked');} });
         if(saved.topic && saved.meta){
             document.getElementById('blogTopicDisplay').value=saved.topic.title||'';
-            document.getElementById('mf-title').textContent=saved.meta.title||'\u2014';
-            document.getElementById('mf-desc').textContent=saved.meta.desc||'\u2014';
-            document.getElementById('mf-keywords').textContent=saved.meta.keywords||'\u2014';
-            document.getElementById('mf-slug').textContent=saved.meta.slug||'\u2014';
+            document.getElementById('mf-title').textContent=saved.meta.title||'—';
+            document.getElementById('mf-desc').textContent=saved.meta.desc||'—';
+            document.getElementById('mf-keywords').textContent=saved.meta.keywords||'—';
+            document.getElementById('mf-slug').textContent=saved.meta.slug||'—';
             if(saved.chatName){ document.getElementById('chatNameDisplay').textContent=saved.chatName; }
             document.getElementById('metaPanel').className='meta-panel visible'+(saved.company==='DCD'?' dcd':'');
-            var slugBox=document.getElementById('slugCopyBox');
+            const slugBox=document.getElementById('slugCopyBox');
             if(slugBox && saved.meta.slug) slugBox.textContent=saved.meta.slug;
             populateCopyStrips();
         }
         if(saved.lastTopics && saved.lastTopics.length>0){
             renderTopics(saved.lastTopics, saved.recommendation||'');
             document.getElementById('topicsWrapper').classList.add('visible');
-            var btn=document.getElementById('runResearchBtn');
-            btn.innerHTML='<i class="fas fa-sync"><\/i> Regenerate Topics';
+            const btn=document.getElementById('runResearchBtn');
+            btn.innerHTML='<i class="fas fa-sync"></i> Regenerate Topics';
             if(saved.topic){
-                var idx=saved.lastTopics.findIndex(function(t){return t.title===saved.topic.title;});
-                if(idx>=0){ var card=document.getElementById('tc-'+idx); if(card){card.classList.add('selected');if(saved.company==='DCD')card.classList.add('dcd-selected');} }
+                const idx=saved.lastTopics.findIndex(t=>t.title===saved.topic.title);
+                if(idx>=0){ const card=document.getElementById('tc-'+idx); if(card){card.classList.add('selected');if(saved.company==='DCD')card.classList.add('dcd-selected');} }
             }
         }
         updateProgress();
@@ -1245,162 +1491,200 @@ function resetAll(){
     document.getElementById('topicsWrapper').classList.remove('visible');
     document.getElementById('topicCardsList').innerHTML='';
     document.getElementById('metaPanel').className='meta-panel';
-    document.getElementById('mf-title').textContent='\u2014';
-    document.getElementById('mf-desc').textContent='\u2014';
-    document.getElementById('mf-keywords').textContent='\u2014';
-    document.getElementById('mf-slug').textContent='\u2014';
-    document.getElementById('chatNameDisplay').textContent='\u2014';
-    var slugBox=document.getElementById('slugCopyBox'); if(slugBox) slugBox.textContent='\u2014';
-    document.querySelectorAll('.copy-strip-value').forEach(function(el){ el.textContent='\u2014'; });
+    document.getElementById('mf-title').textContent='—';
+    document.getElementById('mf-desc').textContent='—';
+    document.getElementById('mf-keywords').textContent='—';
+    document.getElementById('mf-slug').textContent='—';
+    document.getElementById('chatNameDisplay').textContent='—';
+    const slugBox=document.getElementById('slugCopyBox'); if(slugBox) slugBox.textContent='—';
+    document.querySelectorAll('.copy-strip-value').forEach(el => el.textContent='—');
     document.getElementById('researchError').classList.remove('visible');
-    var btn=document.getElementById('runResearchBtn');
-    btn.disabled=false; btn.innerHTML='<i class="fas fa-rocket"><\/i> Run Research & Generate Topics';
-    document.querySelectorAll('input[type="checkbox"]').forEach(function(cb){ cb.checked=false; var st=cb.closest('.step'); if(st) st.classList.remove('checked'); });
-    document.querySelectorAll('.phase').forEach(function(p){p.classList.remove('active','phase-complete');});
-    var pb2=document.getElementById('progressBar'); if(pb2) pb2.style.width='0%';
-    var pd2=document.getElementById('percentDisplay'); if(pd2) pd2.textContent='0%';
-    var td2=document.getElementById('timerDisplay'); if(td2) td2.textContent='00:00';
+    const btn=document.getElementById('runResearchBtn');
+    btn.disabled=false; btn.innerHTML='<i class="fas fa-rocket"></i> Run Research &amp; Generate Topics';
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb=>{ cb.checked=false; cb.closest('.step')?.classList.remove('checked'); });
+    document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active','phase-complete'));
+    document.getElementById('progressBar').style.width='0%';
+    document.getElementById('percentDisplay').textContent='0%';
+    document.getElementById('timerDisplay').textContent='00:00';
     S={ company:S.company, vaName:'', mgmtIdea:'', topic:null, meta:null, chatName:'', startTime:null, checks:{}, completionTriggered:false };
-    showToast('Reset complete \u2014 ready for new blog');
+    showToast('Reset complete — ready for new blog');
 }
 
+// ===== UTILS =====
 function togglePhase(id){ document.getElementById(id).classList.toggle('active'); }
 function animateButton(btn,pt,st){
-    var orig=btn.innerHTML;
-    btn.classList.add('processing'); btn.innerHTML='<span style="opacity:.8">\u25d0<\/span> '+pt;
-    setTimeout(function(){ btn.classList.remove('processing'); btn.classList.add('success'); btn.innerHTML='<span>\u2713<\/span> '+st; setTimeout(function(){ btn.classList.remove('success'); btn.innerHTML=orig; },1200); },600);
+    const orig=btn.innerHTML;
+    btn.classList.add('processing'); btn.innerHTML=`<span style="opacity:.8">◐</span> ${pt}`;
+    setTimeout(()=>{ btn.classList.remove('processing'); btn.classList.add('success'); btn.innerHTML=`<span>✓</span> ${st}`; setTimeout(()=>{ btn.classList.remove('success'); btn.innerHTML=orig; },1200); },600);
 }
 function updateTimer(){
     if(!S.startTime) return;
-    var d=Math.floor((Date.now()-S.startTime)/1000);
-    var td=document.getElementById('timerDisplay'); if(td) td.textContent=String(Math.floor(d/60)).padStart(2,'0')+':'+String(d%60).padStart(2,'0');
+    const d=Math.floor((Date.now()-S.startTime)/1000);
+    document.getElementById('timerDisplay').textContent=String(Math.floor(d/60)).padStart(2,'0')+':'+String(d%60).padStart(2,'0');
 }
-function showToast(msg,isErr){
-    var t=document.getElementById('toast');
-    t.innerHTML='<i class="fas '+(isErr?'fa-exclamation-circle':'fa-check-circle')+'"><\/i> <span>'+msg+'<\/span>';
+function showToast(msg,isErr=false){
+    const t=document.getElementById('toast');
+    t.innerHTML=`<i class="fas ${isErr?'fa-exclamation-circle':'fa-check-circle'}"></i> <span>${msg}</span>`;
     t.style.borderLeft=isErr?'4px solid #ef4444':'4px solid #34d399';
-    t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},3000);
+    t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-var chatModel = 'grok';
+// ===== FLOATING CHAT =====
+let chatModel = 'grok';
 
 function toggleChat() {
-    var widget = document.getElementById('chatWidget');
-    var fab = document.getElementById('chatFab');
-    var isOpen = widget.classList.contains('open');
+    const widget = document.getElementById('chatWidget');
+    const fab = document.getElementById('chatFab');
+    const isOpen = widget.classList.contains('open');
     if(isOpen) {
         widget.classList.remove('open');
-        fab.innerHTML = '<i class="fas fa-comments"><\/i><div class="fab-badge" id="fabBadge"><\/div>';
+        fab.innerHTML = '<i class="fas fa-comments"></i><div class="fab-badge" id="fabBadge"></div>';
     } else {
         widget.classList.add('open');
-        fab.innerHTML = '<i class="fas fa-chevron-down"><\/i>';
-        setTimeout(function(){document.getElementById('chatInput').focus();}, 200);
+        fab.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        document.getElementById('fabBadge')?.style && (document.getElementById('fabBadge').style.display = 'none');
+        setTimeout(()=>document.getElementById('chatInput').focus(), 200);
     }
 }
 
 function setChatModel(m) {
     chatModel = m;
-    var widget = document.getElementById('chatWidget');
+    const widget = document.getElementById('chatWidget');
     if(m === 'both') { widget.classList.add('wide'); } else { widget.classList.remove('wide'); }
     document.getElementById('modelGrok').className = 'chat-model-btn'+(m==='grok'?' active-model':'');
     document.getElementById('modelClaude').className = 'chat-model-btn'+(m==='claude'?' active-model':'');
     document.getElementById('modelBoth').className = 'chat-model-btn'+(m==='both'?' active-model':'');
 }
 
-function callChatAPI(model, msg) {
-    var action = model === 'claude' ? 'claude' : 'message';
-    return fetch('https://stsrecycling.app.n8n.cloud/webhook/mark-ai-brain', {
+async function callChatAPI(model, msg) {
+    const action = model === 'claude' ? 'claude' : 'message';
+    const resp = await fetch('https://stsrecycling.app.n8n.cloud/webhook/mark-ai-brain', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
-            tool: 'chat', action: action, company: 'STS', vaName: S.vaName || 'VA',
-            context: msg, messages: S.chatHistory.slice(-10)
+            tool: 'chat',
+            action: action,
+            company: 'STS',
+            vaName: S.vaName || 'VA',
+            context: msg,
+            messages: S.chatHistory.slice(-10)
         })
-    }).then(function(resp){ return resp.text(); }).then(function(raw){
-        if(!raw || !raw.trim()) throw new Error('Empty response');
-        var data;
-        try { data = JSON.parse(raw); } catch(e) { throw new Error('Invalid response: ' + raw.substring(0,120)); }
-        if(!data.success) throw new Error(data.error || 'Error');
-        return data.text || (data.data&&data.data.reply) || (data.data&&data.data.text) || (typeof data.data === 'string' ? data.data : 'No response');
     });
+    const raw = await resp.text();
+    if(!raw || !raw.trim()) throw new Error('Empty response from server — check n8n workflow');
+    let data;
+    try { data = JSON.parse(raw); } catch(e) { throw new Error('Invalid response format — n8n may have errored: ' + raw.substring(0,120)); }
+    if(!data.success) throw new Error(data.error || 'Brain returned an error');
+    return data.text || data.data?.reply || data.data?.text || (typeof data.data === 'string' ? data.data : 'No response');
 }
 
-function sendChat() {
-    var input = document.getElementById('chatInput');
-    var msg = input.value.trim();
+async function sendChat() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
     if(!msg) return;
-    var btn = document.getElementById('chatSendBtn');
-    var thread = document.getElementById('chatThread');
-    var empty = document.getElementById('chatEmpty');
+
+    const btn = document.getElementById('chatSendBtn');
+    const thread = document.getElementById('chatThread');
+    const empty = document.getElementById('chatEmpty');
+
     if(empty) empty.style.display = 'none';
     document.getElementById('chatSuggestions').style.display = 'none';
+
+    // User bubble
     appendChatBubble('user', msg, 'You');
     S.chatHistory.push({ role:'user', content: msg });
-    input.value = ''; input.style.height = 'auto';
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"><\/i>';
-    var modelLabel = chatModel === 'grok' ? 'GROK 4' : chatModel === 'claude' ? 'SONNET 4.6' : null;
+    input.value = '';
+    input.style.height = 'auto';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    const modelLabel = chatModel === 'grok' ? 'GROK 4' : chatModel === 'claude' ? 'SONNET 4.6' : null;
 
     if(chatModel === 'both') {
-        var grokId = 'think-g-'+Date.now();
-        var claudeId = 'think-c-'+Date.now();
+        // Both — call in parallel, show side by side
+        const grokId = 'think-g-'+Date.now();
+        const claudeId = 'think-c-'+Date.now();
         appendChatBubbleDouble(msg, grokId, claudeId);
         thread.scrollTop = thread.scrollHeight;
-        Promise.allSettled([callChatAPI('grok', msg), callChatAPI('claude', msg)]).then(function(results){
-            var grokEl = document.getElementById(grokId);
-            var claudeEl = document.getElementById(claudeId);
-            var grokReply = results[0].status === 'fulfilled' ? results[0].value : '\u26a0\ufe0f Grok error: '+results[0].reason.message;
-            var claudeReply = results[1].status === 'fulfilled' ? results[1].value : '\u26a0\ufe0f Claude error: '+results[1].reason.message;
-            if(grokEl) grokEl.innerHTML = formatBubbleText(grokReply);
-            if(claudeEl) claudeEl.innerHTML = formatBubbleText(claudeReply);
-            S.chatHistory.push({ role:'assistant', content: '[Grok]: '+grokReply+'\n\n[Claude]: '+claudeReply });
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"><\/i>';
-            thread.scrollTop = thread.scrollHeight;
-        });
+
+        const [grokResult, claudeResult] = await Promise.allSettled([
+            callChatAPI('grok', msg),
+            callChatAPI('claude', msg)
+        ]);
+
+        const grokEl = document.getElementById(grokId);
+        const claudeEl = document.getElementById(claudeId);
+
+        const grokReply = grokResult.status === 'fulfilled' ? grokResult.value : '⚠️ Grok error: '+grokResult.reason?.message;
+        const claudeReply = claudeResult.status === 'fulfilled' ? claudeResult.value : '⚠️ Claude error: '+claudeResult.reason?.message;
+
+        if(grokEl) grokEl.innerHTML = formatBubbleText(grokReply);
+        if(claudeEl) claudeEl.innerHTML = formatBubbleText(claudeReply);
+
+        S.chatHistory.push({ role:'assistant', content: '[Grok]: '+grokReply+'\n\n[Claude]: '+claudeReply });
+
     } else {
-        var thinkId = 'think-'+Date.now();
-        appendChatBubble('assistant', '\u22ef', modelLabel, thinkId, true);
+        const thinkId = 'think-'+Date.now();
+        appendChatBubble('assistant', '⋯', modelLabel, thinkId, true);
         thread.scrollTop = thread.scrollHeight;
-        callChatAPI(chatModel, msg).then(function(reply){
-            var thinkBubble = document.getElementById(thinkId);
+
+        try {
+            const reply = await callChatAPI(chatModel, msg);
+            const thinkBubble = document.getElementById(thinkId);
             if(thinkBubble) thinkBubble.remove();
             S.chatHistory.push({ role:'assistant', content: reply });
             appendChatBubble('assistant', reply, modelLabel);
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"><\/i>';
-            thread.scrollTop = thread.scrollHeight;
-        }).catch(function(e){
-            var thinkBubble = document.getElementById(thinkId);
+        } catch(e) {
+            const thinkBubble = document.getElementById(thinkId);
             if(thinkBubble) thinkBubble.remove();
-            appendChatBubble('assistant', '\u26a0\ufe0f '+e.message, modelLabel);
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"><\/i>';
-            thread.scrollTop = thread.scrollHeight;
-        });
+            appendChatBubble('assistant', '⚠️ '+e.message, modelLabel);
+        }
     }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    thread.scrollTop = thread.scrollHeight;
 }
 
 function formatBubbleText(text) {
-    return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1<\/strong>').replace(/\n/g,'<br>');
+    return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
 }
 
 function appendChatBubbleDouble(userMsg, grokId, claudeId) {
-    var thread = document.getElementById('chatThread');
-    var wrap = document.createElement('div');
+    const thread = document.getElementById('chatThread');
+    const wrap = document.createElement('div');
     wrap.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;';
-    wrap.innerHTML = '<div style="background:var(--cream);border:1px solid var(--border-light);border-radius:10px;border-bottom-left-radius:4px;padding:10px;"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;opacity:.6;"><span style="background:#000;color:white;padding:1px 5px;border-radius:3px;font-size:8px;">GROK 4<\/span><\/div><div id="'+grokId+'" style="font-size:12px;line-height:1.5;color:var(--text-primary);">\u22ef<\/div><\/div><div style="background:var(--cream);border:1px solid var(--border-light);border-radius:10px;border-bottom-right-radius:4px;padding:10px;"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;opacity:.6;"><span style="background:var(--navy);color:white;padding:1px 5px;border-radius:3px;font-size:8px;">SONNET<\/span><\/div><div id="'+claudeId+'" style="font-size:12px;line-height:1.5;color:var(--text-primary);">\u22ef<\/div><\/div>';
+    wrap.innerHTML = `
+        <div style="background:var(--cream);border:1px solid var(--border-light);border-radius:10px;border-bottom-left-radius:4px;padding:10px;">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;opacity:.6;">
+                <span style="background:#000;color:white;padding:1px 5px;border-radius:3px;font-size:8px;">GROK 4</span>
+            </div>
+            <div id="${grokId}" style="font-size:12px;line-height:1.5;color:var(--text-primary);">⋯</div>
+        </div>
+        <div style="background:var(--cream);border:1px solid var(--border-light);border-radius:10px;border-bottom-right-radius:4px;padding:10px;">
+            <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;opacity:.6;">
+                <span style="background:var(--navy);color:white;padding:1px 5px;border-radius:3px;font-size:8px;">SONNET</span>
+            </div>
+            <div id="${claudeId}" style="font-size:12px;line-height:1.5;color:var(--text-primary);">⋯</div>
+        </div>`;
     thread.appendChild(wrap);
 }
 
 function appendChatBubble(role, text, label, id, isThinking) {
-    var thread = document.getElementById('chatThread');
-    var wrap = document.createElement('div');
+    const thread = document.getElementById('chatThread');
+    const wrap = document.createElement('div');
     wrap.style.cssText = 'display:flex;flex-direction:column;'+(role==='user'?'align-items:flex-end;':'align-items:flex-start;');
     if(id) wrap.id = id;
-    var bubble = document.createElement('div');
+
+    const bubble = document.createElement('div');
     bubble.className = 'chat-bubble '+(role==='user'?'user':'assistant')+(isThinking?' thinking':'');
-    var labelEl = document.createElement('div');
+
+    const labelEl = document.createElement('div');
     labelEl.className = 'bubble-label';
     labelEl.textContent = label || (role==='user' ? 'You' : 'AI');
     bubble.appendChild(labelEl);
-    var content = document.createElement('div');
+
+    const content = document.createElement('div');
     content.innerHTML = formatBubbleText(text);
     bubble.appendChild(content);
     wrap.appendChild(bubble);
@@ -1409,8 +1693,8 @@ function appendChatBubble(role, text, label, id, isThinking) {
 
 function clearChat() {
     S.chatHistory = [];
-    var thread = document.getElementById('chatThread');
-    thread.innerHTML = '<div class="chat-empty" id="chatEmpty"><i class="fas fa-robot"><\/i><div style="font-weight:600;color:var(--text-secondary);margin-bottom:4px;font-size:13px;">Ask Mark anything<\/div><div style="font-size:12px;">Research, write, review \u2014 pick a model and go.<\/div><\/div>';
+    const thread = document.getElementById('chatThread');
+    thread.innerHTML = '<div class="chat-empty" id="chatEmpty"><i class="fas fa-robot"></i><div style="font-weight:600;color:var(--text-secondary);margin-bottom:4px;font-size:13px;">Ask Mark anything</div><div style="font-size:12px;">Research, write, review — pick a model and go.</div></div>';
     document.getElementById('chatSuggestions').style.display = 'flex';
 }
 
@@ -1420,12 +1704,13 @@ function useSuggestion(el) {
     document.getElementById('chatInput').focus();
 }
 
+// ===== INIT =====
 window.onload=function(){
     runBoot(); startStatus(); loadState();
     setInterval(updateTimer,1000); setInterval(saveState,10000);
     setTimeout(checkPhaseCompletion,200);
 };
-<\/script>
+</script>
 
 </body>
 </html>
