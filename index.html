@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M.A.R.K. Blog Terminal v1.2</title>
+    <title>Blog Terminal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -296,29 +296,8 @@
 </head>
 <body>
 
-<!-- BOOT -->
-<div class="boot-overlay" id="bootOverlay">
-    <div class="boot-logo">M.A.R.K<span>.</span></div>
-    <div class="boot-text" id="bootText"></div>
-</div>
-
-<!-- HEADER -->
-<header class="ai-header">
-    <div class="neural-node"></div><div class="neural-node"></div><div class="neural-node"></div>
-    <div class="neural-node"></div><div class="neural-node"></div><div class="neural-node"></div>
-    <div class="header-glow glow-1"></div><div class="header-glow glow-2"></div>
-    <div class="ai-status-line"><span id="aiStatusText">● Blog Engine Active</span></div>
-    <div class="header-content">
-        <div>
-            <div style="font-size:11px;font-weight:500;color:var(--gold-dark);letter-spacing:3px;margin-bottom:8px;text-transform:uppercase;">Machine Assisted Routing Kit</div>
-            <h1 style="font-size:40px;font-weight:300;letter-spacing:1px;margin:0;color:var(--navy);">M.A.R.K<span style="color:var(--gold);">.</span> <span style="font-weight:500;font-size:20px;color:var(--text-muted);">v1.2</span></h1>
-        </div>
-        <div style="text-align:right;">
-            <div style="font-size:12px;font-weight:600;color:var(--gold-dark);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">Blog Terminal</div>
-            <div id="headerCompanyBadge" class="company-badge sts">STS</div>
-        </div>
-    </div>
-</header>
+<!-- Hidden badge for JS references -->
+<div id="headerCompanyBadge" class="company-badge sts" style="display:none;">STS</div>
 
 <!-- PROGRESS -->
 <div class="progress-sticky">
@@ -334,7 +313,7 @@
     <!-- ===== MISSION CONTROL ===== -->
     <div class="card setup-section">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <h2 style="color:var(--navy);font-size:20px;">⚙️ Mission Control</h2>
+            <h2 style="color:var(--navy);font-size:20px;">⚙️ Mission Control (Blog Terminal)</h2>
             <button class="btn btn-ghost" onclick="resetAll()" style="border-color:#ef4444;"><span style="color:#ef4444;">⚠️</span> Reset</button>
         </div>
 
@@ -902,25 +881,12 @@ let S = {
 
 // ===== BOOT =====
 function runBoot() {
-    const bt = document.getElementById('bootText');
-    const bo = document.getElementById('bootOverlay');
-    ['Initializing Blog Terminal','Loading Research Engine','Ready'].forEach((msg,i) => {
-        const d = document.createElement('div');
-        d.textContent = msg; d.style.animationDelay = (i*0.4)+'s';
-        bt.appendChild(d);
-    });
-    setTimeout(() => bo.classList.add('hidden'), 2000);
+    // Header removed — no boot needed
 }
 
 // ===== STATUS =====
-const statuses = ['● Blog Engine Active','● Research Module Ready','● SEO Pipeline Loaded','● CMS Connector Online','● Publishing Protocol Active'];
-let sIdx=0;
 function startStatus() {
-    setInterval(() => {
-        sIdx = (sIdx+1) % statuses.length;
-        const el = document.getElementById('aiStatusText');
-        if(el){ el.style.opacity='0'; setTimeout(()=>{el.textContent=statuses[sIdx];el.style.opacity='1';},300); }
-    },3000);
+    // Header removed — no status ticker needed
 }
 
 // ===== COMPANY TOGGLE =====
@@ -1750,11 +1716,5 @@ window.onload=function(){
 };
 </script>
 
-<footer style="max-width:1200px;margin:40px auto 30px;padding:0 20px;">
-    <div style="border-top:1px solid var(--border-light);padding-top:20px;display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:12px;color:var(--text-muted);">M.A.R.K<span style="color:var(--gold);">.</span> Blog Terminal v1.2</div>
-        <div style="font-size:11px;color:var(--text-muted);">STS Electronic Recycling · DCD</div>
-    </div>
-</footer>
 </body>
 </html>
